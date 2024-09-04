@@ -1,6 +1,6 @@
 # from urllib.parse import urlparse
 from flask import Flask, Response, request
-from markupsafe import escape
+from html import escape
 import yt_dlp, cv2
 
 app = Flask(__name__)
@@ -40,7 +40,7 @@ def isoFormatToMS(duration):
 
 @app.route('/')
 def index():
-    return f"<h1>{escape("/<URL or ID>")}</h1>"
+    return f"<h1>{escape('/<URL or ID>')}</h1>"
 
 @app.route('/screenshot')
 def capture_screenshot():
