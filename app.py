@@ -1,11 +1,11 @@
 # from urllib.parse import urlparse
 from flask import Flask, Response, request, jsonify
 from html import escape
-import yt_dlp, cv2
+import yt_dlp#, cv2
 
 app = Flask(__name__)
 
-def get_frame_as_image(url, timestamp_ms):
+""" def get_frame_as_image(url, timestamp_ms):
     cap = cv2.VideoCapture(url)
 
     if not cap.isOpened(): return None
@@ -26,17 +26,17 @@ def get_frame_as_image(url, timestamp_ms):
     return image_data
 
 def isoFormatToMS(duration):
-    """
+    '''
     Return:
         int: miliseconds
-    """
+    '''
     parts = duration.split(":")
     obj = [1, 60, 3600, 86400]
     seconds = 0
 
     parts.reverse()
     for index, value in enumerate(parts): seconds += int(value) * obj[index]
-    return seconds * 1000
+    return seconds * 1000 """
 
 def yt_video_details(url):
     ydl_opts = {
@@ -56,7 +56,7 @@ def yt_video_details(url):
 def index():
     return f"<h1>{escape('/<URL or ID>')}</h1>"
 
-@app.route('/screenshot')
+"""@app.route('/screenshot')
 def capture_screenshot():
     url = request.args.get('url')
     duration = request.args.get('duration', 0)  # Example timestamp in milliseconds
@@ -76,29 +76,21 @@ def capture_screenshot():
     if image_data is None: return Response("Could not capture the frame", status=500)
 
     # Return the image data as a response
-    return Response(image_data, mimetype='image/png')
+    return Response(image_data, mimetype='image/png')"""
 
 @app.route('/testing')
 def test():
     return jsonify(request.args)
 
-@app.route('/<path:uri>')
-def yt(uri):
-    url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-    ydl_opts = {
-        'format': 'bestvideo*',  # Aap yahan format change kar sakte hain
-        'noplaylist': True,
-        'quiet': True,
-        'outtmpl': '-',  # Stream output directly
-    }
-
-    video_url = None
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        # Get video info
-        info_dict = ydl.extract_info(url, download=False)
-        videoUrl = info_dict.get('url')
-        if not videoUrl: return "Something is wrong."
-        video_url = videoUrl
+@app.route('/video')
+def yt():
+    url = request.args.get('url')
     
-    return video_url
+    if not url: return Response("URL is required.", status=500)
+
+    try:
+        info_dict = yt_video_details(url)
+
+        return jsonify(info_dict["formats"])
+    except Exception as e:
+        return Response(str(e), status=500)
