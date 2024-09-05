@@ -1,5 +1,5 @@
 # from urllib.parse import urlparse
-from flask import Flask, Response, request
+from flask import Flask, Response, request, jsonify
 from html import escape
 import yt_dlp, cv2
 
@@ -38,6 +38,20 @@ def isoFormatToMS(duration):
     for index, value in enumerate(parts): seconds += int(value) * obj[index]
     return seconds * 1000
 
+def yt_video_details(url):
+    ydl_opts = {
+        'format': 'bestvideo*[height<=1080]',  # Aap yahan format change kar sakte hain
+        'noplaylist': True,
+        'quiet': True,
+        'outtmpl': '-',  # Stream output directly
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        # Get video info
+        info_dict = ydl.extract_info(url, download=False)
+
+        return info_dict
+
 @app.route('/')
 def index():
     return f"<h1>{escape('/<URL or ID>')}</h1>"
@@ -45,28 +59,17 @@ def index():
 @app.route('/screenshot')
 def capture_screenshot():
     url = request.args.get('url')
-    duration = int(request.args.get('duration', 0))  # Example timestamp in milliseconds
+    duration = request.args.get('duration', 0)  # Example timestamp in milliseconds
     timestamp_ms = isoFormatToMS(duration)
 
-    if not url: return Response("URL is required.", 500)
-    elif not timestamp_ms: return Response("MS is required.", 500)
+    if not url: return Response("URL is required.", status=500)
+    elif not timestamp_ms: return Response("MS is required.", status=500)
 
-    ydl_opts = {
-        'format': 'bestvideo*[height<=1080]',  # Aap yahan format change kar sakte hain
-        'noplaylist': True,
-        'quiet': True,
-        'outtmpl': '-',  # Stream output directly
-    }
-    video_url = None
+    # Get video details and extract the video URL
+    info_dict = yt_video_details(url)
+    video_url = info_dict.get('url')
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        # Get video info
-        info_dict = ydl.extract_info(url, download=False)
-        videoUrl = info_dict.get('url')
-
-        if not videoUrl: return Response("Something is wrong.", 500)
-
-        video_url = videoUrl
+    if not video_url: return Response("Something is wrong.", status=500)
 
     image_data = get_frame_as_image(video_url, timestamp_ms)
 
@@ -74,6 +77,10 @@ def capture_screenshot():
 
     # Return the image data as a response
     return Response(image_data, mimetype='image/png')
+
+@app.route('/testing')
+def test():
+    return jsonify(request.args)
 
 @app.route('/<path:uri>')
 def yt(uri):
