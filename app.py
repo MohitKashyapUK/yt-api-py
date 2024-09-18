@@ -1,7 +1,8 @@
 # from urllib.parse import urlparse
 from flask import Flask, Response, request, jsonify
 from html import escape
-import yt_dlp#, cv2
+from urllib.parse import urlparse
+import yt_dlp
 
 app = Flask(__name__)
 
@@ -78,17 +79,42 @@ def capture_screenshot():
     # Return the image data as a response
     return Response(image_data, mimetype='image/png')"""
 
-@app.route('/testing')
-def test():
-    return jsonify(request.args)
+@app.route('/testing/<path:url>')
+def test(url):
+    id = request.args.get('v')
 
-@app.route('/video')
-def yt():
-    url = request.args.get('url')
-    
-    if not url: return Response("URL is required.", status=500)
+    if not id:
+        # return jsonify(urlparse(url))
+        path = urlparse(url).path
+        arr = path.split('/')
+
+        if not path.startswith('/'): id = path
+        elif path.startswith('/shorts'): id = arr[2]
+        elif path.startswith('/live'): id = arr[2]
+        else: id = arr[1]
+
+        if id.startswith('@') or id == 'channel': return 'Please give video URL.'
+
+    return id
+
+@app.route('/<path:uri>')
+def yt(uri):
+    id = request.args.get('v')
+
+    if not id:
+        # return jsonify(urlparse(url))
+        path = urlparse(uri).path
+        arr = path.split('/')
+
+        if not path.startswith('/'): id = path
+        elif path.startswith('/shorts'): id = arr[2]
+        elif path.startswith('/live'): id = arr[2]
+        else: id = arr[1]
+
+        if id.startswith('@') or id == 'channel': return Response('Please give video URL.', status=500)
 
     try:
+        url = 'https://www.youtube.com/watch?v=' + id
         info_dict = yt_video_details(url)
 
         return jsonify(info_dict["formats"])
