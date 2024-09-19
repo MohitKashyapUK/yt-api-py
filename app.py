@@ -1,5 +1,5 @@
 # from urllib.parse import urlparse
-from flask import Flask, Response, request, jsonify
+from flask import Flask, Response, request, jsonify, send_file
 from html import escape
 from urllib.parse import urlparse
 import yt_dlp
@@ -79,6 +79,10 @@ def capture_screenshot():
 
     # Return the image data as a response
     return Response(image_data, mimetype='image/png')"""
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_file('favicon.png')
 
 @app.route('/testing/<path:url>')
 def test(url):
