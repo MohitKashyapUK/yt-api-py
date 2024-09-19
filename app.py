@@ -43,7 +43,7 @@ def yt_video_details(url):
     ydl_opts = {
         'format': 'bestvideo*[height<=1080]',  # Aap yahan format change kar sakte hain
         'noplaylist': True,
-        'proxy': 'http://3.127.121.101:80',
+        'proxy': 'http://38.191.200.72:999',
         'quiet': True,
         'outtmpl': '-',  # Stream output directly
     }
