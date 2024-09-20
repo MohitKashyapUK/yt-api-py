@@ -43,6 +43,7 @@ def yt_video_details(url):
     ydl_opts = {
         'format': 'bestvideo*[height<=1080][protocol^=http]',  # Aap yahan format change kar sakte hain
         'noplaylist': True,
+        # 'cookies': 'cookies.txt',
         'quiet': True,
         'outtmpl': '-',  # Stream output directly
     }
