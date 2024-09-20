@@ -41,7 +41,7 @@ def isoFormatToMS(duration):
 
 def yt_video_details(url):
     ydl_opts = {
-        'format': 'bestvideo*[height<=1080]',  # Aap yahan format change kar sakte hain
+        'format': 'bestvideo*[height<=1080][protocol^=http]',  # Aap yahan format change kar sakte hain
         'noplaylist': True,
         'proxy': 'http://38.191.200.72:999',
         'quiet': True,
@@ -106,6 +106,7 @@ def test(url):
 def yt(uri):
     id = request.args.get('v')
 
+    # Parsing URL
     if not id:
         # return jsonify(urlparse(url))
         path = urlparse(uri).path
@@ -118,9 +119,12 @@ def yt(uri):
 
         if id.startswith('@') or id == 'channel': return Response('Please give video URL.', status=500)
 
+    # Main code
     try:
-        url = 'https://www.youtube.com/watch?v=' + id
-        info_dict = yt_video_details(url)
+        url = 'https://www.youtube.com/watch?v=' + id # YouTube video URL
+        info_dict = yt_video_details(url) # YouTube video's details and formats
+
+        if request.args.get("get_url"): return info_dict.url
 
         return jsonify(info_dict["formats"])
     except Exception as e:
