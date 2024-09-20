@@ -124,7 +124,7 @@ def yt(uri):
         url = 'https://www.youtube.com/watch?v=' + id # YouTube video URL
         info_dict = yt_video_details(url) # YouTube video's details and formats
 
-        if request.args.get("get_url"): return info_dict.url
+        if request.args.get("get_url"): return info_dict["url"]
 
         return jsonify(info_dict["formats"])
     except Exception as e:
